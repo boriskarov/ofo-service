@@ -2,8 +2,6 @@ package org.itgma.service;
 
 import static org.mockito.Mockito.*;
 
-import org.itgma.service.entity.XmlData;
-import org.itgma.service.repo.XmlDataRepo;
 import org.itgma.service.service.XmlDataService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
