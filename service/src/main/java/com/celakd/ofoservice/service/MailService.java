@@ -1,7 +1,7 @@
 package com.celakd.ofoservice.service;
 
-import com.celakd.ofoservice.entity.EmailDetails;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface MailService {
-    void sendMailToAccountManager(EmailDetails emailDetails);
+    void sendMailToAccountManager(String subject, String messageBody, MultipartFile attachment);
 }

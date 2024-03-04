@@ -1,10 +1,11 @@
 package com.celakd.ofoservice.service.impl;
 
-import com.celakd.ofoservice.entity.EmailDetails;
 import com.celakd.ofoservice.service.MailService;
+import jakarta.activation.DataSource;
 import jakarta.mail.Message;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.util.ByteArrayDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -13,6 +14,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 
@@ -22,26 +24,27 @@ public class MailServiceImpl implements MailService {
     private JavaMailSender mailSender;
     @Value("${spring.mail.username}")
     private String sender;
+    // change the recipient below and spring email settings in app properties
+    private static final String recipient = "accountmanager@example.com";
 
 
-    // change the spring email settings in app properties and the recipient in the EmailDetails entity
     @Override
-    public void sendMailToAccountManager(EmailDetails emailDetails) {
+    public void sendMailToAccountManager(String subject, String messageBody, MultipartFile attachment) {
         MimeMessagePreparator preparator = new MimeMessagePreparator() {
             @Override
             public void prepare(MimeMessage mimeMessage) throws Exception {
-                mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(emailDetails.getRecipient()));
+                mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(recipient));
                 mimeMessage.setFrom(new InternetAddress(sender));
-                mimeMessage.setSubject(emailDetails.getSubject());
-                if (emailDetails.getAttachment() != null) {
-                    FileSystemResource file = new FileSystemResource(new File(emailDetails.getAttachment()));
+                mimeMessage.setSubject(subject);
+                if (attachment != null) {
                     MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-                    helper.setText(emailDetails.getMessageBody(), true);
-                    helper.addAttachment(file.getFilename(), file);
+                    helper.setText(messageBody, true);
+                    DataSource dataSource = new ByteArrayDataSource(attachment.getInputStream(), attachment.getContentType());
+                    helper.addAttachment(attachment.getOriginalFilename(), dataSource);
                 }
                 else{
-                    MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-                    helper.setText(emailDetails.getMessageBody(), true);
+                    MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false);
+                    helper.setText(messageBody, true);
                 }
             }
         };
